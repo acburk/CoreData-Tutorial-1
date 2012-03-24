@@ -19,6 +19,38 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    NSManagedObjectContext *context = [self managedObjectContext];
+    NSManagedObject *failedBankInfo = [NSEntityDescription
+                                       insertNewObjectForEntityForName:@"FailedBankInfo"
+                                       inManagedObjectContext:context];
+    [failedBankInfo setValue:@"Test Bank" forKey:@"name"];
+    [failedBankInfo setValue:@"Testville" forKey:@"city"];
+    [failedBankInfo setValue:@"Testland" forKey:@"state"];
+    NSManagedObject *failedBankDetails = [NSEntityDescription
+                                          insertNewObjectForEntityForName:@"FailedBankDetails"
+                                          inManagedObjectContext:context];
+    [failedBankDetails setValue:[NSDate date] forKey:@"closeDate"];
+    [failedBankDetails setValue:[NSDate date] forKey:@"updateDate"];
+    [failedBankDetails setValue:[NSNumber numberWithInt:12345] forKey:@"zip"];
+    [failedBankDetails setValue:failedBankInfo forKey:@"info"];
+    [failedBankInfo setValue:failedBankDetails forKey:@"details"];
+    NSError *error;
+    if (![context save:&error]) {
+        NSLog(@"Whoops, couldn't save: %@", [error localizedDescription]);
+    }
+
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription
+                                   entityForName:@"FailedBankInfo" inManagedObjectContext:context];
+    [fetchRequest setEntity:entity];
+    NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
+    for (NSManagedObject *info in fetchedObjects) {
+        NSLog(@"Name: %@", [info valueForKey:@"name"]);
+        NSManagedObject *details = [info valueForKey:@"details"];
+        NSLog(@"Zip: %@", [details valueForKey:@"zip"]);
+    }
+    
+    
     // Override point for customization after application launch.
     UINavigationController *navigationController = (UINavigationController *)self.window.rootViewController;
     FBCDMasterViewController *controller = (FBCDMasterViewController *)navigationController.topViewController;
