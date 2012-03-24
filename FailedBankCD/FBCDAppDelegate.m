@@ -7,8 +7,9 @@
 //
 
 #import "FBCDAppDelegate.h"
-
 #import "FBCDMasterViewController.h"
+#import "FailedBankInfo.h"
+#import "FailedBankDetails.h"
 
 @implementation FBCDAppDelegate
 
@@ -20,36 +21,36 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     NSManagedObjectContext *context = [self managedObjectContext];
-    NSManagedObject *failedBankInfo = [NSEntityDescription
-                                       insertNewObjectForEntityForName:@"FailedBankInfo"
-                                       inManagedObjectContext:context];
-    [failedBankInfo setValue:@"Test Bank" forKey:@"name"];
-    [failedBankInfo setValue:@"Testville" forKey:@"city"];
-    [failedBankInfo setValue:@"Testland" forKey:@"state"];
-    NSManagedObject *failedBankDetails = [NSEntityDescription
-                                          insertNewObjectForEntityForName:@"FailedBankDetails"
-                                          inManagedObjectContext:context];
-    [failedBankDetails setValue:[NSDate date] forKey:@"closeDate"];
-    [failedBankDetails setValue:[NSDate date] forKey:@"updateDate"];
-    [failedBankDetails setValue:[NSNumber numberWithInt:12345] forKey:@"zip"];
-    [failedBankDetails setValue:failedBankInfo forKey:@"info"];
-    [failedBankInfo setValue:failedBankDetails forKey:@"details"];
+    FailedBankInfo *failedBankInfo = [NSEntityDescription
+                                      insertNewObjectForEntityForName:@"FailedBankInfo"
+                                      inManagedObjectContext:context];
+    failedBankInfo.name = @"Test Bank";
+    failedBankInfo.city = @"Testville";
+    failedBankInfo.state = @"Testland";
+    FailedBankDetails *failedBankDetails = [NSEntityDescription
+                                            insertNewObjectForEntityForName:@"FailedBankDetails"
+                                            inManagedObjectContext:context];
+    failedBankDetails.closeDate = [NSDate date];
+    failedBankDetails.updateDate = [NSDate date];
+    failedBankDetails.zip = [NSNumber numberWithInt:12345];
+    failedBankDetails.info = failedBankInfo;
+    failedBankInfo.details = failedBankDetails;
     NSError *error;
     if (![context save:&error]) {
         NSLog(@"Whoops, couldn't save: %@", [error localizedDescription]);
     }
-
+    
+    // Test listing all FailedBankInfos from the store
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription *entity = [NSEntityDescription
-                                   entityForName:@"FailedBankInfo" inManagedObjectContext:context];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"FailedBankInfo"
+                                              inManagedObjectContext:context];
     [fetchRequest setEntity:entity];
     NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
-    for (NSManagedObject *info in fetchedObjects) {
-        NSLog(@"Name: %@", [info valueForKey:@"name"]);
-        NSManagedObject *details = [info valueForKey:@"details"];
-        NSLog(@"Zip: %@", [details valueForKey:@"zip"]);
+    for (FailedBankInfo *info in fetchedObjects) {
+        NSLog(@"Name: %@", info.name);
+        FailedBankDetails *details = info.details;
+        NSLog(@"Zip: %@", details.zip);
     }
-    
     
     // Override point for customization after application launch.
     UINavigationController *navigationController = (UINavigationController *)self.window.rootViewController;
