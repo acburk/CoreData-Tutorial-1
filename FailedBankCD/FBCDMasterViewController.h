@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FBCDMasterViewController : UITableViewController
+@interface FBCDMasterViewController : UITableViewController <NSFetchedResultsControllerDelegate>
 
 @property (nonatomic,strong) NSManagedObjectContext* managedObjectContext;
-@property (nonatomic,strong) NSArray* failedBankInfos;
+@property (nonatomic, retain) NSFetchedResultsController *fetchedResultsController;
 @end
